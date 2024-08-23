@@ -1,11 +1,17 @@
-# ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
+# ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) Azeroth Core Module
 
-## Premium Account
+## mod-premium
 
-- Latest Premium Account build status with azerothcore:
+![Latest Release](https://img.shields.io/github/v/release/araxiaonline/mod-premium?label=current%20version)
+![GitHub Release Date](https://img.shields.io/github/release-date/araxiaonline/mod-premium)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/araxiaonline/mod-premium/build-release.yml?branch=araxia-main&event=push&label=build%20status)
 
-[![Build Status](https://github.com/azerothcore/mod-premium/workflows/core-build/badge.svg?branch=master&event=push)](https://github.com/azerothcore/mod-premium)
+<p align="left">
+  <img src="https://github.com/araxiaonline/docs/blob/main/docs/media/logo-sm.png?raw=true" alt="Araxia Online" width="70" style="vertical-align: middle;"/>
+  <span style="font-size: 20px; vertical-align: middle;">Player Tested By Araxia Online</span>
+</p>
 
+### Description
 This is a module for [AzerothCore](http://www.azerothcore.org) that adds Premium account features to players.
 
 ![script screenshot](/screenshots/script.png?raw=true "script screenshot")
@@ -20,7 +26,7 @@ This module allows players to:
 - Mount (60%) players will mount the correct mount for the race
 - Summon Vendor
 - Trainer players will now spawn their class trainer also depending on faction.
-- Added creature spawn check. 
+- Added creature spawn check.
 
 Upcoming features:
 - Teleport players to major citys
