@@ -12,7 +12,13 @@ enum Vendors
     NPC_VENDOR_A    = 54,
     NPC_VENDOR_H    = 3163,
     NPC_AUCTION_H   = 9856,
-    NPC_AUCTION_A   = 8670
+    NPC_AUCTION_A   = 8670,
+    NPC_HIGHLEVEL_BARTENDER = 29049,
+    NPC_HIGHLEVEL_INNKEEPER = 28687,
+    NPC_AMMO_VENDOR = 29493,
+    NPC_POISON_VENDOR = 29535,
+    NPC_REAGENT_VENDOR = 29537,
+    NPC_FLIGHT_MASTER = 18940
 };
 
 enum Trainers
@@ -56,20 +62,42 @@ enum Mounts
     DRAENEI_MOUNT   = 34406
 };
 
+/*
+Database Mappings of Text Menu
+(@MENUID, 0, 0, "Morph", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 1, 0, "Demorph", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 2, 2, "Mount", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 3, 3, "Train me", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 4, 4, "Player interactions", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 5, 1, "Innkeeper", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 6, 4, "Mail Box", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 7, 6, "Show Bank", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 8, 7, "Auction House", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 9, 1, "Bartender", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 10, 1, "Ammo Supplier", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 11, 1, "Poison Dealer", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 12, 1, "Reagent Vendor", 0, 1, 1, 0, 0, 0, 0, "", 0, 0),
+(@MENUID, 13, 2, "Flight Master", 0, 1, 1, 0, 0, 0, 0, "", 0, 0);
+*/
+
 enum PremiumGossip
 {
     PREMIUM_MENU = 62001,
     PREMIUM_MENU_TEXT = 90003,
     GOSSIP_MORPH = 0,
-    GOSSIP_DEMORPH,
-    GOSSIP_MOUNT,
-    GOSSIP_TRAIN_ME,
-    GOSSIP_PLAYER,
-    GOSSIP_VENDOR,
-    GOSSIP_MAIL,
-    GOSSIP_BANK,
-    GOSSIP_AUCTION_HOUSE,
-    GOSSIP_FACTION
+    GOSSIP_DEMORPH = 1,
+    GOSSIP_MOUNT = 2,
+    GOSSIP_TRAIN_ME = 3,
+    GOSSIP_PLAYER = 4,
+    GOSSIP_INNKEEPER = 5,
+    GOSSIP_MAIL = 6,
+    GOSSIP_BANK = 7,
+    GOSSIP_AUCTION_HOUSE = 8,
+    GOSSIP_BARTENDER = 9,
+    GOSSIP_AMMO_VENDOR = 10,
+    GOSSIP_POISON_VENDOR = 11,
+    GOSSIP_REAGENT_VENDOR = 12,
+    GOSSIP_FLIGHT_MASTER = 13
 };
 
 class premium_account : public ItemScript
@@ -84,37 +112,11 @@ public:
 
         QueryResult result = CharacterDatabase.Query("SELECT `AccountId` FROM `premium` WHERE `active`=1 AND `AccountId`={}", player->GetSession()->GetAccountId());
 
-        if (!result)
-            return false;
+        // Let all players have it
+        // if (!result)
+        //     return false;
 
         if (player->IsInCombat())
-            return false;
-
-        float rangeCheck = 10.0f;
-
-        if (player->FindNearestCreature(NPC_AUCTION_A, rangeCheck) ||
-            player->FindNearestCreature(NPC_AUCTION_H, rangeCheck) ||
-            player->FindNearestCreature(NPC_VENDOR_A, rangeCheck) ||
-            player->FindNearestCreature(NPC_VENDOR_H, rangeCheck) ||
-            player->FindNearestCreature(ROGUE_A, rangeCheck) ||
-            player->FindNearestCreature(WARRIOR_A, rangeCheck) ||
-            player->FindNearestCreature(HUNTER_A, rangeCheck) ||
-            player->FindNearestCreature(PRIEST_A, rangeCheck) ||
-            player->FindNearestCreature(PALADIN_A, rangeCheck) ||
-            player->FindNearestCreature(DRUID_A, rangeCheck) ||
-            player->FindNearestCreature(SHAMAN_A, rangeCheck) ||
-            player->FindNearestCreature(MAGE_A, rangeCheck) ||
-            player->FindNearestCreature(WARLOCK_A, rangeCheck) ||
-            player->FindNearestCreature(HUNTER_H, rangeCheck) ||
-            player->FindNearestCreature(WARRIOR_H, rangeCheck) ||
-            player->FindNearestCreature(SHAMAN_H, rangeCheck) ||
-            player->FindNearestCreature(PALADIN_H, rangeCheck) ||
-            player->FindNearestCreature(ROGUE_H, rangeCheck) ||
-            player->FindNearestCreature(WARLOCK_H, rangeCheck) ||
-            player->FindNearestCreature(MAGE_H, rangeCheck) ||
-            player->FindNearestCreature(PRIEST_H, rangeCheck) ||
-            player->FindNearestCreature(DRUID_H, rangeCheck) ||
-            player->FindNearestCreature(DEATHKNIGHT_AH, rangeCheck))
             return false;
 
         ClearGossipMenuFor(player);
@@ -131,8 +133,17 @@ public:
         if (sConfigMgr->GetOption<bool>("Trainers", true))
             AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_TRAIN_ME, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
 
-        if (sConfigMgr->GetOption<bool>("PlayerInteraction", true))
-            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_PLAYER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 9);
+        if (sConfigMgr->GetOption<bool>("PlayerInteraction", true)) {
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_BANK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3); /* Bank */
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_MAIL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);    /* Mail Box */
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_AUCTION_HOUSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7); /* Auction House */
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_INNKEEPER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);  /* Innkeeper*/
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_BARTENDER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 20); /* Bartender*/
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_AMMO_VENDOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 21); /* Ammo Supplier */
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_POISON_VENDOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22); /* Poison Dealer */
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_REAGENT_VENDOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 23); /* Reagent Vendor */
+            AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_FLIGHT_MASTER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 24); /* Flight Master */
+        }
 
         SendGossipMenuFor(player, PREMIUM_MENU_TEXT, item->GetGUID());
         return false; // Cast the spell on use normally
@@ -164,46 +175,65 @@ public:
                 player->GetSession()->SendShowMailBox(player->GetGUID());
                 break;
             }
-            case GOSSIP_ACTION_INFO_DEF + 5: /*Vendor*/
+            case GOSSIP_ACTION_INFO_DEF + 5: /*InnKeeper*/
             {
-                uint32 vendorId = 0;
-                std::string salute;
-
-                if (player->GetTeamId() == TEAM_ALLIANCE)
-                {
-                    vendorId = NPC_VENDOR_A;
-                    switch (player->GetSession()->GetSessionDbLocaleIndex())
-                    {
-                    case LOCALE_enUS:
-                    case LOCALE_koKR:
-                    case LOCALE_frFR:
-                    case LOCALE_deDE:
-                    case LOCALE_zhCN:
-                    case LOCALE_zhTW:
-                    case LOCALE_ruRU:
-                    {
-                        salute = "Greetings";
-                        break;
-                    }
-                    case LOCALE_esES:
-                    case LOCALE_esMX:
-                    {
-                        salute = "Saludos.";
-                    }
-                    default:
-                        break;
-                    }
-                }
-                else
-                {
-                    vendorId = NPC_VENDOR_H;
-                    salute = "Zug zug";
-                }
+                uint32 vendorId = NPC_HIGHLEVEL_INNKEEPER;
+                std::string salute = "How can I server you?";
 
                 SummonTempNPC(player, vendorId, salute.c_str());
                 CloseGossipMenuFor(player);
                 break;
             }
+
+            case GOSSIP_ACTION_INFO_DEF + 20: /*Bartender*/
+            {
+                uint32 vendorId = NPC_HIGHLEVEL_BARTENDER;
+                std::string salute = "What can I get you?";
+
+                SummonTempNPC(player, vendorId, salute.c_str());
+                CloseGossipMenuFor(player);
+                break;
+            }
+
+            case GOSSIP_ACTION_INFO_DEF + 21: /*Ammo Vendor*/
+            {
+                uint32 vendorId = NPC_AMMO_VENDOR;
+                std::string salute = "Gear up?";
+
+                SummonTempNPC(player, vendorId, salute.c_str());
+                CloseGossipMenuFor(player);
+                break;
+            }
+            case GOSSIP_ACTION_INFO_DEF + 22: /*Poison Vendor*/
+            {
+                uint32 vendorId = NPC_POISON_VENDOR;
+                std::string salute = "Need some poison?";
+
+                SummonTempNPC(player, vendorId, salute.c_str());
+                CloseGossipMenuFor(player);
+                break;
+            }
+
+            case GOSSIP_ACTION_INFO_DEF + 23: /*Reagent Vendor*/
+            {
+                uint32 vendorId = NPC_REAGENT_VENDOR;
+                std::string salute = "Buy some reagents?";
+
+                SummonTempNPC(player, vendorId, salute.c_str());
+                CloseGossipMenuFor(player);
+                break;
+            }
+
+            case GOSSIP_ACTION_INFO_DEF + 24: /*Flight Master*/
+            {
+                uint32 vendorId = NPC_FLIGHT_MASTER;
+                std::string salute = "Where to?";
+
+                SummonTempNPC(player, vendorId, salute.c_str());
+                CloseGossipMenuFor(player);
+                break;
+            }
+
             case GOSSIP_ACTION_INFO_DEF + 6: /*Mount*/
             {
                 CloseGossipMenuFor(player);
@@ -322,25 +352,6 @@ public:
                 CloseGossipMenuFor(player);
                 break;
             }
-            case GOSSIP_ACTION_INFO_DEF + 9: /*Player Interactions*/
-            {
-                ClearGossipMenuFor(player);
-
-                if (sConfigMgr->GetOption<bool>("Vendor", true))
-                    AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_VENDOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-
-                if (sConfigMgr->GetOption<bool>("MailBox", true))
-                    AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_MAIL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-
-                if (sConfigMgr->GetOption<bool>("Bank", true))
-                    AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_BANK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-
-                if (sConfigMgr->GetOption<bool>("Auction", true))
-                    AddGossipItemFor(player, PREMIUM_MENU, GOSSIP_AUCTION_HOUSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
-
-                SendGossipMenuFor(player, PREMIUM_MENU_TEXT, item->GetGUID());
-                break;
-            }
         }
     }
 
@@ -388,19 +399,50 @@ public:
         if (!player || entry == 0)
             return;
 
+        if(NpcIsSummoned(player, entry, 15.0f)) {
+            return;
+        }
+
         int npcDuration = sConfigMgr->GetOption<int32>("Premium.NpcDuration", 60) * IN_MILLISECONDS;
         if (npcDuration <= 0) // Safeguard
             npcDuration = 60;
 
-        Creature* npc = player->SummonCreature(entry, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, npcDuration);
+        float randomAngle = frand(0, 350);
+
+        // Summon the creature at a position with this random angle to prevent overlap
+        Creature* npc = player->SummonCreature(entry,
+            player->GetPositionX() + cos(randomAngle) * 2.0f, // Offset the position
+            player->GetPositionY() + sin(randomAngle) * 2.0f,
+            player->GetPositionZ(),
+            randomAngle,
+            TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT,
+            npcDuration);
+
+        // Set the summoned creature's attribtes to typical vendors
         npc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        npc->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, player->GetFollowAngle());
         npc->SetFaction(player->GetFaction());
+
+        float uniqueFollowAngle = player->GetFollowAngle() + frand(-1.0f, 1.0f); // Adjust this range as needed
+        npc->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, uniqueFollowAngle);
 
         if (salute && !(salute[0] == '\0'))
             npc->Whisper(salute, LANG_UNIVERSAL, player, false);
     }
+
+    bool NpcIsSummoned(Player* player, uint32 entry, float range)
+    {
+        if (!player)
+            return false;
+
+        if(player->FindNearestCreature(entry, range)) {
+            return true;
+        }
+
+        return false;
+    }
 };
+
+
 
 void AddPremiumAccount()
 {
